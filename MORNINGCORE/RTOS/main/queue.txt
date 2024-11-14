@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+
+QueueHandle_t queue_handle = NULL;
+
+typedef struct
+{
+    int value;
+}queue_data_t;
+
+void taskA(void* param)
+{
+    // receive data from the queue and print out the data
+    queue_data_t data;
+    while(1)
+    {
+        if(pdTRUE == xQueueReceive(queue_handle,&data,100))
+        {
+            ESP_LOGI("queue","received queue value:%d",data.value);
+        }
+    }
+}
+
+void taskB(void* param)
+{
+    // send data into the queue
+
+    queue_data_t data;
+    memset(&data,0,sizeof(queue_data_t));
+
+    // send a data every 1 sec
+    while(1)
+    {
+        xQueueSend(queue_handle, &data, 100);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        data.value++;
+    }
+}
+
+/**
+ * @brief Entry point of the program
+ * @param None
+ * @retval None
+ */
+void app_main(void)
+{
+    queue_handle = xQueueCreate(10, sizeof(queue_data_t));
+
+    xTaskCreatePinnedToCore(taskA,"taskA", 2048, NULL, 3, NULL, tskNO_AFFINITY);
+    xTaskCreatePinnedToCore(taskB,"taskB", 2048, NULL, 3, NULL, tskNO_AFFINITY);
+}
