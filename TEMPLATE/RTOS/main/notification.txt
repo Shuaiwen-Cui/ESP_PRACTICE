@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "esp_log.h"
+
+static TaskHandle_t taskA_handle;
+static TaskHandle_t taskB_handle;
+
+void taskA(void* param)
+{   
+
+    // 定时发送任务通知值
+    uint32_t value = 0;
+    vTaskDelay(pdMS_TO_TICKS(200)); // wait taskB to be created
+    while(1)
+    {
+        xTaskNotify(taskB_handle, value, eSetValueWithOverwrite);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        value++;
+    }
+}
+
+void taskB(void* param)
+{
+    // 接受任务通知值并打印
+    uint32_t value;
+    while(1)
+    {
+        xTaskNotifyWait(0x00, ULONG_MAX, &value, portMAX_DELAY);
+        ESP_LOGI("EV", "value got from the notification is: %lu", value);
+    }
+}
+
+
+void app_main(void)
+{
+
+    xTaskCreatePinnedToCore(taskA, "taskA", 2048, NULL, 3, &taskA_handle, tskNO_AFFINITY);
+    xTaskCreatePinnedToCore(taskB, "taskB", 2048, NULL, 3, &taskB_handle, tskNO_AFFINITY);
+}

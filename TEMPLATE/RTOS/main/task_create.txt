@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+
+void taskA(void *param)
+{
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(500); // 500 ms
+    // Initialize last wakeup time
+    xLastWakeTime = xTaskGetTickCount();
+
+    while(1)
+    {
+        ESP_LOGI("main","Hello world from CSW!");
+
+        // Wait for next cycle
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    }
+}
+
+
+/**
+ * @brief Entry point of the program
+ * @param None
+ * @retval None
+ */
+void app_main(void)
+{
+    xTaskCreatePinnedToCore(taskA, "helloworld", 2048, NULL, 3, NULL, tskNO_AFFINITY);
+}

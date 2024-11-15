@@ -1,0 +1,17 @@
+dependencies:
+  espressif/tinyusb:
+    dependencies: []
+    source:
+      path: /home/cshwstem/CSW/Development/ESP_PRACTICE/TEMPLATE/DNESP32S3M_factory_program/components/espressif__tinyusb
+      type: local
+    version: 0.15.0~3
+  idf:
+    source:
+      type: idf
+    version: 5.3.1
+direct_dependencies:
+- espressif/tinyusb
+- idf
+manifest_hash: b3f21fdfe4e9c45655114872943cd65053c6c0c0297448bb6a3f7d29e3a359b6
+target: esp32s3
+version: 2.0.0
